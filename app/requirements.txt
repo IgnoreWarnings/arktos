@@ -1,0 +1,2 @@
+serial[allbusses]
+python-can[allbusses]
