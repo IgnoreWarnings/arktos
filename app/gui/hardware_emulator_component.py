@@ -10,7 +10,7 @@ class HardwareEmulatorComponent(tk.Frame):
             hexagon = controller.get_hexagon()
 
             led = controller.get_led()
-            color = led.get_color().to_hex() if led.is_on() else "grey"
+            color = led.get_color().to_hex()
 
             try:
                 self.layout_view.layout_component.set_hexagon_color(
@@ -41,7 +41,8 @@ class HardwareEmulatorComponent(tk.Frame):
         entrypoint = interface.get_controllers()[0].get_hexagon()
         layout = GeometricLayoutBuilder.layout(entrypoint)
 
-        self.layout_view = LayoutView(self, layout, click_handler=self.on_hex_click)
+        self.layout_view = LayoutView(self, layout)
+        self.layout_view.layout_component.set_hexagon_handler(self.on_hex_click)
         self.layout_view.pack(
             side="right",
             fill="both",
