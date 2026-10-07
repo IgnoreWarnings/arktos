@@ -5,6 +5,7 @@ from .can_connection import CanConnection
 from .can_protocol import CanProtocol
 from arktos.colors import COLORS
 from dataclasses import dataclass, field
+import threading
 
 @dataclass
 class HexagonState:
@@ -26,17 +27,17 @@ class CanController:
             CanHexagonController(
                 Hexagon(),
                 CanRGBLed(self, 0),
-                CanButton(self, 0)
+                CanButton()
             ),
             CanHexagonController(
                 Hexagon(),
                 CanRGBLed(self, 1),
-                CanButton(self, 1)
+                CanButton()
             ),
             CanHexagonController(
                 Hexagon(),
                 CanRGBLed(self, 2),
-                CanButton(self, 2)
+                CanButton()
             ),
         ]
 
@@ -80,13 +81,38 @@ class CanRGBLed(RGBLedInterface):
 
 
 class CanButton(ButtonInterface):
-    def __init__(self, can_controller: CanController, index: int):
-        self.can_controller = can_controller
-        self.index = index
+    def __init__(self):
         self.state = False
 
     def is_pressed(self) -> bool:
-        self.state
+        return self.state
+
+
+class Updater:
+    def __init__(self, can_connection: CanConnection, can_controllers: [CanController]):
+        self.can_connection = can_connection
+        self.can_controllers = can_controllers
+
+    def listen(self):
+        while True:
+            message = self.can_connection.read()
+
+            if message:
+                parsed = CanProtocol.parse_arbitration_id(message.arbitration_id)
+                # TODO: Refactor to a Filter
+                if parsed["message_type"] == CanProtocol.MessageType.SCHOLLE:
+                    if parsed["protocol_header"] == CanProtocol.ScholleCommand.BUTTON_STATE:
+                        for controller in self.can_controllers:
+                            if controller.can_id == parsed["source_id"]:
+                                value = message.data[0]
+
+                                controller.hexagon_controllers[0].get_button().state = bool(value & (1 << 0))
+                                controller.hexagon_controllers[1].get_button().state = bool(value & (1 << 1))
+                                controller.hexagon_controllers[2].get_button().state = bool(value & (1 << 2))
+
+    def start(self):
+        thread = threading.Thread(target=self.listen, daemon=True)
+        thread.start()
 
 
 class CanHexagonController(HexagonControllerInterface):
@@ -142,14 +168,17 @@ class CanHardware(HardwareInterface):
             ids.add(parsed["source_id"])
 
         controllers = []
-
+        can_controllers = []
         for can_id in ids:
-            controller = CanController(
+            can_controller = CanController(
                 can_connection,
                 can_id
             )
 
-            controllers.extend(controller.get_hexagon_controllers())
+            controllers.extend(can_controller.get_hexagon_controllers())
+            can_controllers.append(can_controller) 
+
+        Updater(can_connection, can_controllers).start()
 
         return CanHardware(
             controllers,

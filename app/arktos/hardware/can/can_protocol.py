@@ -37,6 +37,7 @@ class CanProtocol():
 
     DEFAULT_PRIORITY = MessagePriority.LOW
     BROADCAST_ADDRESS = 0b01000000
+    DEFAULT_SOURCE = 136
 
     @classmethod
     def parse_arbitration_id(cls, arbitration_id):
@@ -72,7 +73,7 @@ class CanProtocol():
         # Arbitration
         priority = CanProtocol.MessagePriority.HIGH
         message_type = CanProtocol.MessageType.BUS_CONTROL
-        source_id = 4
+        source_id = CanProtocol.DEFAULT_SOURCE
         protocol_header = CanProtocol.BusControlMessage.PING
 
         arbitration_id = CanProtocol.arbitration_id( priority,
@@ -95,7 +96,7 @@ class CanProtocol():
         # Arbitration
         priority = CanProtocol.MessagePriority.HIGH
         message_type = CanProtocol.MessageType.SCHOLLE
-        source_id = 4
+        source_id = CanProtocol.DEFAULT_SOURCE
         protocol_header = CanProtocol.ScholleCommand.SET_COLOR
 
         arbitration_id = CanProtocol.arbitration_id( priority,
@@ -131,7 +132,7 @@ class CanProtocol():
         # Arbitration
         priority = CanProtocol.MessagePriority.HIGH
         message_type = CanProtocol.MessageType.SCHOLLE
-        source_id = 4
+        source_id = CanProtocol.DEFAULT_SOURCE
         protocol_header = CanProtocol.ScholleCommand.SET_COLOR
 
         arbitration_id = CanProtocol.arbitration_id(
@@ -174,7 +175,7 @@ class CanProtocol():
         # Arbitration
         priority = CanProtocol.DEFAULT_PRIORITY
         message_type = CanProtocol.MessageType.SCHOLLE
-        source_id = 4
+        source_id = CanProtocol.DEFAULT_SOURCE
         protocol_header = CanProtocol.ScholleCommand.BUTTON_STATE_REQUEST
         arbitration_id = CanProtocol.arbitration_id( priority,
                                                     message_type,

@@ -7,11 +7,11 @@ from .hardware_emulator_component import HardwareEmulatorComponent
 
 class GameView:
     def emulate_start(self):
-        game.playingfield.interface.start_button.state = True
-        root.after(
+        self.game.playingfield.interface.start_button.state = True
+        self.root.after(
             1000,
             lambda: setattr(
-                game.playingfield.interface.start_button,
+                self.game.playingfield.interface.start_button,
                 "state",
                 False
             )
