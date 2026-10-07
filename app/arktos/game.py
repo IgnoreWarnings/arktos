@@ -76,7 +76,7 @@ class Game():
 
         animation_player = AnimationPlayer()
         animation_player.set_animation(AnimationPath(controllers))
-        animation_player.play(frame_delay=0.5, looping=True)
+        animation_player.play(frame_delay=0.3, looping=True)
 
         # Await button press
         initiator = None

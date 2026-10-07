@@ -11,14 +11,14 @@ from arktos.game import Game
 class App:
 
     def run(self):
-        root = tk.Tk()
-        root.title("Arktos")
-        root.geometry("1920x1080")
-
         can_connection = CanConnection()
         start_button = MockButton()
         interface = CanHardware.from_discovery(can_connection, start_button)
         #interface = MockHardware.from_size(15)
+
+        root = tk.Tk()
+        root.title("Arktos")
+        root.geometry("1920x1080")
 
         def on_setup_complete(playingfield):
             self.setup_view.destroy()

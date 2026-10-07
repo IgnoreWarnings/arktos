@@ -13,4 +13,6 @@ root.geometry("1920x1080")
 mock_interface = MockHardware.from_size(15)
 
 viewer = SetupView(root, mock_interface)
+viewer.pack(fill="both", expand=True)
+
 root.mainloop()

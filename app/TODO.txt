@@ -1,7 +1,9 @@
-- return to editor
 - feat: remove socket connections
+- return to editor
 - BUG: Can bind socket to self
 
+
+- Search for TODO
 - Many widgets bind elements to root but should bind to self, see setup_view as correct example
 - rework Animations/Player to use proper frame per second system
 - Add a fade between animations in Animation Que from last frame to first frame

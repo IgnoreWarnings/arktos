@@ -143,7 +143,7 @@ class SetupView(tk.Frame):
             # On hw press
             if controller.get_button().is_pressed():
                 # Change selected on hw press
-                self.select(self.selected)
+                self.select(controller)
 
                 color = led.get_color().to_hex()
 
@@ -160,7 +160,7 @@ class SetupView(tk.Frame):
                 pass
 
         # Schedule update
-        self.root.after(50, self.update)
+        self.root.after(100, self.update)
 
     def rebuild_layout(self):
         entrypoint = next(iter(self.layout_view.layout_component.layout.hexagon_map))
@@ -181,10 +181,13 @@ class SetupView(tk.Frame):
         self.selected_socket = socket
 
     def deselect_socket(self):
+        socket = self.selected_socket
+        socket_item = self.layout_view.layout_component.socket_to_item[socket]
+        if socket.peer:
+            self.canvas.itemconfig(socket_item, fill="green", outline="")
+        else:
+            self.canvas.itemconfig(socket_item, fill="grey", outline="")
         self.selected_socket = None
-
-        # Rebuild Layout
-        self.rebuild_layout()
 
     def select(self, controller):
         # Deselect last selected
@@ -234,8 +237,9 @@ class SetupView(tk.Frame):
         # Set Led to indicate placed
         controller.get_led().set_color(COLORS.GREEN)
 
-        # Deselect
-        self.deselect_socket()
+        # Deselect socket
+        if self.selected_socket:
+            self.deselect_socket()
 
     def __init__(
             self,
