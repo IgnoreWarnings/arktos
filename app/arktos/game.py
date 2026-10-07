@@ -37,7 +37,7 @@ class Game():
         animation_player = AnimationPlayer()
         animation_queue = AnimationQueue(animation_player)
 
-        animation_queue.queue.append(AnimationWaves(interface))
+        animation_queue.queue.append(AnimationWaves(interface.get_controllers()))
 
         animation_queue.queue.append(AnimationRainbow(interface))
 
@@ -100,14 +100,15 @@ class Game():
 
         animation_player.stop()
 
-        # Remove Path
-        for controller in controllers:
-            controller.get_led().set_color(RGBColor(0,0,0))
+        animation_player = AnimationPlayer()
+        animation_player.set_animation(AnimationWaves(self.playingfield.interface.get_controllers()))
+        animation_player.play(looping=True)
 
         # Move Detection
         abort = False
         current_position = None
         controllers = self.playingfield.interface.get_controllers()
+        correct = []
         while not abort and current_position != self.pathfinder.end:
             # Await button press
             initiator = None
@@ -119,6 +120,7 @@ class Game():
 
             # Wrong move
             if initiator.get_hexagon() not in self.pathfinder.path:
+                animation_player.stop()
                 animation_player = AnimationPlayer()
                 animation_player.set_animation(AnimationPulse(self.playingfield.interface, initiator))
                 animation_player.play()
@@ -126,9 +128,17 @@ class Game():
             
             # Correct move
             else:
-                initiator.get_led().set_color(RGBColor(0, 0, 255))
-                current_position = initiator.get_hexagon()
+                correct.append(initiator)
+                left = [h for h in self.playingfield.interface.get_controllers() if h not in correct]
+                animation_player.stop()
+                animation_player = AnimationPlayer()
+                animation_player.set_animation(AnimationWaves(left))
+                animation_player.play(looping=True)
 
+                initiator.get_led().set_color(COLORS.RED)
+                current_position = initiator.get_hexagon()
+        
+        animation_player.stop()
         self.running = False
 
     def start_thread(self):

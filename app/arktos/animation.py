@@ -43,12 +43,12 @@ class AnimationPath(Animation):
 class AnimationWaves(Animation):
     def __init__(
         self,
-        interface: HardwareInterface,
+        controllers: list[HexagonControllerInterface],
         step: float = 0.02,
     ):
         self.leds = []
 
-        for controller in interface.get_controllers():
+        for controller in controllers:
             self.leds.append(controller.get_led())
 
         self.phase = 0.0
