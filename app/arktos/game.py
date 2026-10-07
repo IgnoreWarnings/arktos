@@ -6,7 +6,8 @@ from .hardware.hardware_interface import RGBColor
 from .playingfield import Playingfield
 from .pathfinder import Pathfinder
 from .animation_player import AnimationPlayer, AnimationQueue
-from .animation import AnimationRainbow, AnimationFadeAll, AnimationPulse, AnimationPath
+from .animation import AnimationRainbow, AnimationFadeAll, AnimationPulse, AnimationPath, AnimationWater, AnimationWaves
+from .colors import COLORS
 
 class Game():
     def __init__(self, playingfield: Playingfield) -> None:
@@ -35,7 +36,14 @@ class Game():
         # Animation
         animation_player = AnimationPlayer()
         animation_queue = AnimationQueue(animation_player)
+
+        animation_queue.queue.append(AnimationWaves(interface))
+
         animation_queue.queue.append(AnimationRainbow(interface))
+
+        animation_queue.queue.append(AnimationWater(interface.get_controllers()))
+        animation_queue.queue.append(AnimationWater(interface.get_controllers()))
+
         animation_queue.queue.append(AnimationFadeAll(interface, RGBColor(0,0,0), RGBColor(255,255,0), 400))
         animation_queue.queue.append(AnimationFadeAll(interface, RGBColor(255,255,0), RGBColor(0,255,255), 200))
         animation_queue.queue.append(AnimationFadeAll(interface, RGBColor(0,255,255), RGBColor(255,0,255), 200))
@@ -46,6 +54,7 @@ class Game():
         animation_queue.queue.append(AnimationFadeAll(interface, RGBColor(255,0,255), RGBColor(0,255,255), 200))
         animation_queue.queue.append(AnimationFadeAll(interface, RGBColor(0,255,255), RGBColor(255,255,0), 200))
         animation_queue.queue.append(AnimationFadeAll(interface, RGBColor(255,255,0), RGBColor(255,255,255), 400))
+
         animation_queue.play(looping=True, max_animation_duration=10.0)
         
         # Wait for start
@@ -73,6 +82,9 @@ class Game():
                 if controller.hexagon == hexagon:
                     controllers.append(controller)
                     break
+
+        for controller in self.playingfield.interface.get_controllers():
+            controller.get_led().set_color(COLORS.BLUE)
 
         animation_player = AnimationPlayer()
         animation_player.set_animation(AnimationPath(controllers))
