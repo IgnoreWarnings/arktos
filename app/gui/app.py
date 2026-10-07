@@ -3,7 +3,7 @@ import tkinter as tk
 from .setup_view import SetupView
 from .game_view import GameView
 
-from arktos.hardware.mock_hardware import MockHardware
+from arktos.hardware.mock_hardware import MockHardware, MockButton
 from arktos.hardware.can.can_hardware import CanHardware
 from arktos.hardware.can.can_connection import CanConnection
 from arktos.game import Game
@@ -16,7 +16,8 @@ class App:
         root.geometry("1920x1080")
 
         can_connection = CanConnection()
-        interface = CanHardware.from_discovery(can_connection)
+        start_button = MockButton()
+        interface = CanHardware.from_discovery(can_connection, start_button)
         #interface = MockHardware.from_size(15)
 
         def on_setup_complete(playingfield):

@@ -200,12 +200,9 @@ class SetupView(tk.Frame):
             else:
                 led.set_color(COLORS.GREEN)
 
-            led.on()
-
         self.selected = controller
         led = controller.get_led()
         led.set_color(COLORS.YELLOW)
-        led.on()
 
     def place(self):
         if self.selected is None:
@@ -348,6 +345,5 @@ class SetupView(tk.Frame):
         for controller in controllers:
             led = controller.get_led()
             led.set_color(COLORS.RED)
-            led.on()
-
+        
         self.update()

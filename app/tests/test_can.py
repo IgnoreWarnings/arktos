@@ -21,16 +21,16 @@ while(True):
                 return is_set
 
             if(test_bit(data, 0)):
-                connection.write(CanProtocol.set_leds(CanProtocol.BROADCAST_ADDRESS, 0, RGBColor(255, 0, 255)))
+                connection.write(CanProtocol.set_led(CanProtocol.BROADCAST_ADDRESS, 0, RGBColor(255, 0, 255)))
             if(test_bit(data, 1)):
-                connection.write(CanProtocol.set_leds(CanProtocol.BROADCAST_ADDRESS, 1, RGBColor(0, 255, 255)))
+                connection.write(CanProtocol.set_led(CanProtocol.BROADCAST_ADDRESS, 1, RGBColor(0, 255, 255)))
             if(test_bit(data, 2)):
-                connection.write(CanProtocol.set_leds(CanProtocol.BROADCAST_ADDRESS, 2, RGBColor(255, 255, 0)))
+                connection.write(CanProtocol.set_led(CanProtocol.BROADCAST_ADDRESS, 2, RGBColor(255, 255, 0)))
             
             print(''.join(format(byte, '08b') for byte in data))
             #print(int.from_bytes(data))
     else:
-        connection.write(CanProtocol.set_leds(CanProtocol.BROADCAST_ADDRESS, 0, RGBColor(0,0,0)))
+        connection.write(CanProtocol.set_led(CanProtocol.BROADCAST_ADDRESS, 0, RGBColor(0,0,0)))
 
     # for i in range(255):
     #     for j in range(3): 
@@ -39,7 +39,7 @@ while(True):
     #         b = 255 * i/255 if j == 2 else 0
             
     #         color = RGBColor(r,b,g)
-    #         connection.write(CanProtocol.set_leds(CanProtocol.BROADCAST_ADDRESS, j, color))
+    #         connection.write(CanProtocol.set_led(CanProtocol.BROADCAST_ADDRESS, j, color))
     #         time.sleep(0.05)
 
                     

@@ -4,53 +4,97 @@ from ..hardware_interface import HardwareInterface, HexagonControllerInterface, 
 from .can_connection import CanConnection
 from .can_protocol import CanProtocol
 from arktos.colors import COLORS
+from dataclasses import dataclass, field
+
+@dataclass
+class HexagonState:
+    color: RGBColor = RGBColor(0, 0, 0)
+
+
+class CanController:
+    def __init__(self, can_connection, can_id):
+        self.can_connection = can_connection
+        self.can_id = can_id
+
+        self.states = [
+            HexagonState(),
+            HexagonState(),
+            HexagonState(),
+        ]
+
+        self.hexagon_controllers = [
+            CanHexagonController(
+                Hexagon(),
+                CanRGBLed(self, 0),
+                CanButton(self, 0)
+            ),
+            CanHexagonController(
+                Hexagon(),
+                CanRGBLed(self, 1),
+                CanButton(self, 1)
+            ),
+            CanHexagonController(
+                Hexagon(),
+                CanRGBLed(self, 2),
+                CanButton(self, 2)
+            ),
+        ]
+
+    def get_hexagon_controllers(self) -> list[HexagonControllerInterface]:
+        return self.hexagon_controllers
+
+    def get_color(self, index: int) -> RGBColor:
+        return self.states[index].color
+
+    def set_led(self, index: int, color: RGBColor) -> None:
+        self.states[index].color = color
+
+        self.__send_led_state()
+
+    def __send_led_state(self) -> None:
+        colors = [
+            state.color for state in self.states
+        ]
+
+        message = CanProtocol.set_leds(
+            self.can_id,
+            colors
+        )
+
+        self.can_connection.write(message)
 
 
 class CanRGBLed(RGBLedInterface):
-    def __init__(self) -> None:
-        super().__init__()
-        self.state = False
-        self.color = RGBColor(0,0,0)
-
-    def on(self) -> None:
-        self.state = True
-
-    def off(self) -> None:
-        self.state = False
-
-    def is_on(self) -> bool:
-        return self.state
+    def __init__(self, can_controller: CanController, index: int):
+        self.can_controller = can_controller
+        self.index = index
 
     def set_color(self, color: RGBColor) -> None:
-        self.color = color
+        self.can_controller.set_led(
+            self.index,
+            color
+        )
 
     def get_color(self) -> RGBColor:
-        return self.color
+        return self.can_controller.get_color(self.index)
 
 
 class CanButton(ButtonInterface):
-    def __init__(self):
+    def __init__(self, can_controller: CanController, index: int):
+        self.can_controller = can_controller
+        self.index = index
         self.state = False
 
     def is_pressed(self) -> bool:
-        return self.state
+        self.state
 
 
 class CanHexagonController(HexagonControllerInterface):
     def __init__(self, hexagon: Hexagon, led: RGBLedInterface, button: ButtonInterface) -> None:
         super().__init__()
-        # Spawn fake hardware
         self.hexagon = hexagon
         self.led = led
         self.button = button
-
-    @classmethod
-    def Can(cls):
-        # Spawn fake hardware
-        hexagon = Hexagon()
-        button = CanButton()
-        led = CanRGBLed()
-        return CanHexagonController(hexagon, led, button)
 
     def get_hexagon(self) -> Hexagon:
         return self.hexagon
@@ -61,38 +105,56 @@ class CanHexagonController(HexagonControllerInterface):
     def get_button(self) -> ButtonInterface:
         return self.button
 
-
 class CanHardware(HardwareInterface):
     def __init__(self, 
-                controllers: list[HexagonControllerInterface], 
+                controllers: list[CanHexagonController], 
                 start_button: ButtonInterface) -> None:
         super().__init__()
 
         self.controllers = controllers
         self.start_button = start_button
-
-    @classmethod 
-    def from_discovery(cls, can_connection: CanConnection):
+                
+    @classmethod
+    def from_discovery(cls, can_connection: CanConnection, start_button):
         can_connection.open()
 
-        message = CanProtocol.ping(CanProtocol.BROADCAST_ADDRESS)
-        can_connection.write(message)
+        can_connection.write(
+            CanProtocol.ping(CanProtocol.BROADCAST_ADDRESS)
+        )
 
-        ids = []
-        while(True):
+        ids = set()
+
+        while True:
             message = can_connection.read(timeout=2)
-            if message:
-                parsed = CanProtocol.parse_arbitration_id(message.arbitration_id)
-                ids.append(parsed["source_id"])
-            else:
-                break
-        
-        print(ids)
-        for _id in ids:
-            message = CanProtocol.set_leds(_id, 1, COLORS.YELLOW)
-            can_connection.write(message)
 
-        return CanHardware(controllers, start_button)
+            # All processed
+            if message is None:
+                break
+
+            parsed = CanProtocol.parse_arbitration_id(
+                message.arbitration_id
+            )
+
+            if parsed["protocol_header"] != CanProtocol.BusControlMessage.PING_RESPONSE:
+                print("Warning: Other message during ping processing recieved")
+                continue
+
+            ids.add(parsed["source_id"])
+
+        controllers = []
+
+        for can_id in ids:
+            controller = CanController(
+                can_connection,
+                can_id
+            )
+
+            controllers.extend(controller.get_hexagon_controllers())
+
+        return CanHardware(
+            controllers,
+            start_button
+        )
 
     def get_controllers(self) -> list[HexagonControllerInterface]:
         return self.controllers

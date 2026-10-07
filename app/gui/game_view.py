@@ -6,6 +6,16 @@ from .hardware_component import HardwareComponent
 from .hardware_emulator_component import HardwareEmulatorComponent
 
 class GameView:
+    def emulate_start(self):
+        game.playingfield.interface.start_button.state = True
+        root.after(
+            1000,
+            lambda: setattr(
+                game.playingfield.interface.start_button,
+                "state",
+                False
+            )
+        )
 
     def __init__(self, root, game: Game):
         self.root = root
@@ -30,15 +40,15 @@ class GameView:
         label = tk.Label(sidebar, textvariable=self.game_state_var, font=("Arial", 10))
         label.pack(fill="x", pady=4)
 
-        # # Start Button
-        # finish_button = tk.Button(
-        #     sidebar,
-        #     text="Start Game",
-        #     command=self.start_game,
-        #     font=("Arial", 14, "bold"),
-        #     bg="#4CAF50",
-        # )
-        # finish_button.pack(side="bottom", pady=(0, 100))
+        # Start Button Hook
+        finish_button = tk.Button(
+            sidebar,
+            text="Start Game",
+            command=self.emulate_start,
+            font=("Arial", 14, "bold"),
+            bg="#4CAF50",
+        )
+        finish_button.pack(side="right", pady=(0, 100))
 
         self.update_vars()
         self.game.start_thread()

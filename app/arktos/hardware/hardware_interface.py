@@ -17,18 +17,6 @@ class RGBColor():
 
 class RGBLedInterface(ABC):
     @abstractmethod
-    def on(self) -> None:
-        pass
-
-    @abstractmethod
-    def off(self) -> None:
-        pass
-
-    @abstractmethod
-    def is_on(self) -> bool:
-        pass
-
-    @abstractmethod
     def set_color(self, color: RGBColor) -> None:
         pass
 
@@ -58,10 +46,6 @@ class HexagonControllerInterface(ABC):
 
 
 class HardwareInterface(ABC):
-    # @abstractmethod
-    # def discovery(cls) -> list[HardwareInterface]:
-    #     pass
-
     @abstractmethod
     def get_controllers(self) -> list[HexagonControllerInterface]:
         pass

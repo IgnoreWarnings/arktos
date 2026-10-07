@@ -65,7 +65,7 @@ class Game():
         # Turn all off
         controllers = self.playingfield.interface.get_controllers()
         for controller in controllers:
-            controller.get_led().off()
+            controller.get_led().set_color(RGBColor(0,0,0))
 
         controllers = []
         for hexagon in self.pathfinder.get_path():
@@ -90,7 +90,7 @@ class Game():
 
         # Remove Path
         for controller in controllers:
-            controller.get_led().off()
+            controller.get_led().set_color(RGBColor(0,0,0))
 
         # Move Detection
         abort = False
@@ -115,7 +115,6 @@ class Game():
             # Correct move
             else:
                 initiator.get_led().set_color(RGBColor(0, 0, 255))
-                initiator.get_led().on()
                 current_position = initiator.get_hexagon()
 
         self.running = False

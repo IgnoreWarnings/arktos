@@ -11,7 +11,7 @@ class HardwareView(tk.Frame):
             hexagon = controller.get_hexagon()
 
             led = controller.get_led()
-            color = led.get_color().to_hex() if led.is_on() else "grey"
+            color = led.get_color().to_hex()
 
             try:
                 self.layout_view.layout_component.set_hexagon_color(

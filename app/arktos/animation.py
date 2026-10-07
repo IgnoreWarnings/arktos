@@ -27,11 +27,9 @@ class AnimationPath(Animation):
         for controller in self.controllers:
             led = controller.get_led()
             led.set_color(RGBColor(0,150,0))
-            led.on()
 
         led = self.controllers[self.path_index].get_led()
         led.set_color(RGBColor(0,255,0))
-        led.on()
 
         self.path_index += 1
 
@@ -53,7 +51,6 @@ class AnimationFadeAll(Animation):
 
         for controller in interface.get_controllers():
             led = controller.get_led()
-            led.on()
             self.leds.append(led)
 
         self.start = start
@@ -97,7 +94,6 @@ class AnimationRainbow(Animation):
 
         for controller in interface.get_controllers():
             led = controller.get_led()
-            led.on()
             self.leds.append(led)
 
         self.hue = 0.0
@@ -143,7 +139,6 @@ class AnimationPulse(Animation):
         if self.illuminated == []:
             led = self.source.get_led()
             led.set_color(RGBColor(255,0,0))
-            led.on()
             self.illuminated.append(self.source)
             return True
         
@@ -154,7 +149,6 @@ class AnimationPulse(Animation):
                 if illuminate.get_hexagon() in controller.get_hexagon().neighbors():
                     led = controller.get_led()
                     led.set_color(RGBColor(255,0,0))
-                    led.on()
                     illumination_layer.append(controller)
         
         self.illuminated += illumination_layer

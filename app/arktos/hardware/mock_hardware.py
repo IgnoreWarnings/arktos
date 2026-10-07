@@ -7,15 +7,6 @@ class MockRGBLed(RGBLedInterface):
         self.state = False
         self.color = RGBColor(0,0,0)
 
-    def on(self) -> None:
-        self.state = True
-
-    def off(self) -> None:
-        self.state = False
-
-    def is_on(self) -> bool:
-        return self.state
-
     def set_color(self, color: RGBColor) -> None:
         self.color = color
 

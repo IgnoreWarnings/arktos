@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from arktos.hardware import HardwareInterface, HexagonControllerInterface
+from arktos.hardware import HardwareInterface, HexagonControllerInterface, RGBColor
 
 class ControllerRow:
     def __init__(self, parent, hexagon_id, controller: HexagonControllerInterface):
@@ -42,7 +42,7 @@ class ControllerRow:
             self.button_state.set("Released")
 
         # LED
-        if self.controller.get_led().is_on():
+        if self.controller.get_led().get_color() != RGBColor(0,0,0):
             color = self.controller.get_led().get_color()
             self.led_color_label.config(text=color.to_hex(), background=color.to_hex())
         else:

@@ -91,37 +91,83 @@ class CanProtocol():
         return message
 
     @classmethod
-    def set_leds(cls, destination_address, sub_hexagon: int, color: RGBColor):
-            # Arbitration
-            priority = CanProtocol.MessagePriority.HIGH
-            message_type = CanProtocol.MessageType.SCHOLLE
-            source_id = 4
-            protocol_header = CanProtocol.ScholleCommand.SET_COLOR
-    
-            arbitration_id = CanProtocol.arbitration_id( priority,
-                                                         message_type,
-                                                         destination_address,
-                                                         source_id,
-                                                         protocol_header)
-    
-            # Data for RGB
-            data = 0
-            hexagon_offset = sub_hexagon * 21
-            RESOLUTION = 127
-            color_scaled = tuple(int(RESOLUTION * x) for x in color.to_percent())
-    
-            color_offset = 0
-            for component in color_scaled:
-                data |= (component & 0x7F) << (hexagon_offset + color_offset)
-                color_offset += 7
-            
-            # Convert data to little endian
-            data_bytes = data.to_bytes(8, byteorder="little")
-            
-            # Build Message
-            message = can.Message(arbitration_id=arbitration_id, is_extended_id=True, data=data_bytes)
+    def set_led(cls, destination_address, sub_hexagon: int, color: RGBColor):
+        # Arbitration
+        priority = CanProtocol.MessagePriority.HIGH
+        message_type = CanProtocol.MessageType.SCHOLLE
+        source_id = 4
+        protocol_header = CanProtocol.ScholleCommand.SET_COLOR
 
-            return message
+        arbitration_id = CanProtocol.arbitration_id( priority,
+                                                        message_type,
+                                                        destination_address,
+                                                        source_id,
+                                                        protocol_header)
+
+        # Data for RGB
+        data = 0
+        hexagon_offset = sub_hexagon * 21
+        RESOLUTION = 127
+        color_scaled = tuple(int(RESOLUTION * x) for x in color.to_percent())
+
+        color_offset = 0
+        for component in color_scaled:
+            data |= (component & 0x7F) << (hexagon_offset + color_offset)
+            color_offset += 7
+        
+        # Convert data to little endian
+        data_bytes = data.to_bytes(8, byteorder="little")
+        
+        # Build Message
+        message = can.Message(arbitration_id=arbitration_id, is_extended_id=True, data=data_bytes)
+
+        return message
+
+    @classmethod
+    def set_leds(cls, destination_address, colors: list[RGBColor]):
+        if len(colors) != 3:
+            raise ValueError("Expected exactly 3 sub-hexagon colors")
+
+        # Arbitration
+        priority = CanProtocol.MessagePriority.HIGH
+        message_type = CanProtocol.MessageType.SCHOLLE
+        source_id = 4
+        protocol_header = CanProtocol.ScholleCommand.SET_COLOR
+
+        arbitration_id = CanProtocol.arbitration_id(
+            priority,
+            message_type,
+            destination_address,
+            source_id,
+            protocol_header
+        )
+
+        # Data for 3 RGB LEDs
+        data = 0
+        RESOLUTION = 127
+
+        for sub_hexagon, color in enumerate(colors):
+            color_scaled = tuple(
+                int(RESOLUTION * x)
+                for x in color.to_percent()
+            )
+
+            hexagon_offset = sub_hexagon * 21
+
+            for color_offset, component in enumerate(color_scaled):
+                data |= (
+                    (component & 0x7F)
+                    << (hexagon_offset + color_offset * 7)
+                )
+
+        # Convert data to little endian
+        data_bytes = data.to_bytes(8, byteorder="little")
+
+        return can.Message(
+            arbitration_id=arbitration_id,
+            is_extended_id=True,
+            data=data_bytes
+        )
 
     @classmethod
     def get_button(cls, destination_address):
